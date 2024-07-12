@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AplicationRoute from "./AplicationRoute";
 import AuthRoute from "./AuthRoute";
 import PrivateRoute from "./PrivateRoute";
@@ -13,6 +13,13 @@ const PrincipalRoute = () => {
     return (
         <BrowserRouter>
             <Routes>
+
+                <Route
+                    path="/"
+                    element={
+                        isLogged ? <Navigate to="/app/home" /> : <Navigate to="/auth/login" />
+                    }
+                />
 
                 {/* rutas públicas */}
                 <Route
