@@ -8,7 +8,7 @@ Este proyecto interactua con una base de datos Postgres en contenedores Docker d
 ### 1. Clonar el proyecto
 
 ```bash
-https://github.com/weizmanfabian/OperacionDeTransporte.git
+https://github.com/weizmanfabian/Transporte.git
 ```
 
 ### 1.1. Descargar y ejecutar la imagen de Docker para PostgreSql
