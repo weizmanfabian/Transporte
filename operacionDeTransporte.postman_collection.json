@@ -1,0 +1,335 @@
+{
+	"info": {
+		"_postman_id": "c5fa5faa-57cd-43dc-889a-d71cacf148c4",
+		"name": "operacionDeTransporte",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17147091",
+		"_collection_link": "https://universal-escape-976290.postman.co/workspace/Musica~fc72d7c8-73e8-48d5-b9bd-0588fb56264c/collection/17147091-c5fa5faa-57cd-43dc-889a-d71cacf148c4?action=share&source=collection_link&creator=17147091"
+	},
+	"item": [
+		{
+			"name": "Manifiestos",
+			"item": [
+				{
+					"name": "manifiestos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/manifiestos",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manifiestos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "manifiestos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let res = pm.response.json();\r",
+									"pm.collectionVariables.set(\"idManifiesto\", res.id);\r",
+									"console.log(pm.collectionVariables.get(\"idManifiesto\"));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"idTitular\": 1,\r\n    \"valorDelViaje\": 5000000,\r\n    \"idVehiculo\": 1,\r\n    \"idConductor\": 1,\r\n    \"remitente\": \"Empresa Weizman\",\r\n    \"destinatario\": \"Empresa Fabian\",\r\n    \"remesas\": [\r\n        {\r\n            \"tipoDeMercancia\": \"Electrónica\",\r\n            \"caracteristicas\": \"Teclados Gamer\",\r\n            \"peso\": 50,\r\n            \"unidadDeMedida\": \"KILOGRAMO\",\r\n            \"volumen\": \"352\",\r\n            \"empaque\": \"Caja\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/manifiestos",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manifiestos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "manifiestos_id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/manifiestos/{{idManifiesto}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manifiestos",
+								"{{idManifiesto}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "manifiestos",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"idTitular\": 2,\r\n    \"valorDelViaje\": 3000000,\r\n    \"idVehiculo\": 2,\r\n    \"idConductor\": 2,\r\n    \"remitente\": \"Empresa Fabi\",\r\n    \"destinatario\": \"Empresa Weiz\",\r\n    \"remesas\": [\r\n        {\r\n             \"id\": 2,\r\n            \"tipoDeMercancia\": \"Electrónica Weiz\",\r\n            \"caracteristicas\": \"Teclados Gamer Fabi\",\r\n            \"peso\": 50,\r\n            \"unidadDeMedida\": \"KILOGRAMO\",\r\n            \"volumen\": \"352\",\r\n            \"empaque\": \"Caja Weiz\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/manifiestos/{{idManifiesto}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manifiestos",
+								"{{idManifiesto}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "manifiestos",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/manifiestos/{{idManifiesto}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"manifiestos",
+								"{{idManifiesto}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "test",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/test",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"test"
+					],
+					"query": [
+						{
+							"key": "nameFieldSort",
+							"value": "numeroIdentificacion",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "conductores",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/conductores",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"conductores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "conductores_id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/conductores/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"conductores",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "titulares",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/titulares",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"titulares"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "titulares_id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/titulares/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"titulares",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "vehiculos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/vehiculos",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"vehiculos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "vehiculos_id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/vehiculos/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"vehiculos",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remesas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/remesas",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"remesas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remesas_id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/remesas/4",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"remesas",
+						"4"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:8084/OperacionDeTransporte",
+			"type": "string"
+		},
+		{
+			"key": "idManifiesto",
+			"value": "6",
+			"type": "string"
+		}
+	]
+}
