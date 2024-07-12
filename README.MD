@@ -46,7 +46,7 @@ Copia y pega todo el contenido del script `OrquestadorPostgreSql` y ejecútalo e
 cd Transporte/OperacionDeTransporte
 ```
 
-### 6. Navegar al directorio `OperacionDeTransporte/op-trans-front` y lo abrimos en una terminal
+### 6. Navegar al directorio `Transporte/op-trans-front` y lo abrimos en una terminal
 
 ### 7. Instalar las dependencias del proyecto
 
