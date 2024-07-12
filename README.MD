@@ -43,7 +43,7 @@ Copia y pega todo el contenido del script `OrquestadorPostgreSql` y ejecútalo e
 ### 5. Navegar al directorio `OperacionDeTransporte/OperacionDeTransporte` y lo abrimos con un editor de java por ejemplo `IntelliJ`, lo compilamos y arrancamos el proyecto. `PORT 8084`
 
 ```bash
-cd OperacionDeTransporte/OperacionDeTransporte
+cd Transporte/OperacionDeTransporte
 ```
 
 ### 6. Navegar al directorio `OperacionDeTransporte/op-trans-front` y lo abrimos en una terminal
