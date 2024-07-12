@@ -40,7 +40,7 @@ CREATE DATABASE OperacionDeTransporte;
 
 Copia y pega todo el contenido del script `OrquestadorPostgreSql` y ejecútalo en la base de datos `OperacionDeTransporte`.
 
-### 5. Navegar al directorio `OperacionDeTransporte/OperacionDeTransporte` y lo abrimos con un editor de java por ejemplo `IntelliJ`, lo compilamos y arrancamos el proyecto. `PORT 8084`
+### 5. Navegar al directorio `Transporte/OperacionDeTransporte` y lo abrimos con un editor de java por ejemplo `IntelliJ`, lo compilamos y arrancamos el proyecto. `PORT 8084`
 
 ```bash
 cd Transporte/OperacionDeTransporte
