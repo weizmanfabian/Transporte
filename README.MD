@@ -1,5 +1,5 @@
 
-# MCT Test
+# Test
 
 Este proyecto interactua con una base de datos Postgres en contenedores Docker desde Java v17 y React v18
 
