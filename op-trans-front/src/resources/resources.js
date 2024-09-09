@@ -6,3 +6,12 @@ export const UnidadDeMedidaEnum = [
     { name: 'ONZA' },
     { name: 'GRAMO' }
 ]
+
+export const UnidadDeMedidaEnumNew = [
+    'KILOGRAMO',
+    'ARROBA',
+    'TONELADA',
+    'LIBRA',
+    'ONZA',
+    'GRAMO'
+]

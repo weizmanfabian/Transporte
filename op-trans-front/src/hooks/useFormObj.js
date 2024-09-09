@@ -1,12 +1,12 @@
 import { useState } from "react";
-import Swal from "sweetalert2";
 
-export const useForm = (initialForm, validateForm, sendPostPut) => {
+export const useForm = (initialForm, validateForm) => {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e, callback) => {
+
+  const handleChange = async (e, callback) => {
     const { name, value } = e.target;
 
     setForm((prevForm) => ({
@@ -14,56 +14,50 @@ export const useForm = (initialForm, validateForm, sendPostPut) => {
       [name]: value,
     }));
 
-    if (callback) callback();
+    if (callback) await callback();
   };
 
-  const handleBlur = (e, callback) => {
+  const handleBlur = async (e, callback) => {
     handleChange(e);
     setErrors(validateForm(form));
 
-    if (callback) callback();
+    if (callback) await callback();
   };
 
   const handleSubmit = async (
     e,
-    actionServer,
-    name,
-    value,
-    actionPost = null,
+    sendPostPutForm, // Función a ejecutar (POST, PUT o cualquier otra)
     actionPrev = null,
-    headers = {}
+    actionPost = null
   ) => {
     e.preventDefault();
-
     const errResult = await validateForm(form);
-    if (Object.keys(errResult).length === 0) {
+    if ((errResult && Object.values(errResult).some((error) => error !== "")) ||
+      JSON.stringify(form) !== JSON.stringify(initialForm)) {
       try {
-        Swal.fire({
-          title: "...!",
-          html: "Espere mientras se cargan los datos...",
-          timerProgressBar: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
+        setIsSubmitting(true); // Inicia el estado de envío
 
-        const newForm = actionPrev ? await actionPrev() : form;
-        const res = await sendPostPut(actionServer, newForm, name, value, headers);
-        
-        Swal.close();
-        const { err, msg } = res.data;
-        if (err) {
-          Swal.fire(err);
-        } else {
-          e.target.reset();
-          Swal.fire(msg);
-          setForm(initialForm);
-          if (actionPost) actionPost();
-        }
+        // Swal.fire({
+        //   title: "...!",
+        //   html: "Espere mientras se cargan los datos...",
+        //   timerProgressBar: false,
+        //   didOpen: () => {
+        //     Swal.showLoading();
+        //   },
+        // });
+
+        if (actionPrev) await actionPrev();
+
+        // Ejecutar la función pasada como sendPostPutForm
+        await sendPostPutForm();
+
+        if (actionPost) await actionPost();
+
       } catch (err) {
-        console.error(
-          `Ocurrió un error al realizar el post del hook useForm: ${actionServer} Err: ${err}`
-        );
+        console.error(`Ocurrió un error: ${err}`);
+      } finally {
+        //Swal.close();
+        setIsSubmitting(false); // Finaliza el estado de envío
       }
     } else {
       setErrors(errResult);
@@ -71,59 +65,16 @@ export const useForm = (initialForm, validateForm, sendPostPut) => {
     }
   };
 
-  const handleSubmitWithObject = async (
-    e,
-    actionServer,
-    newForm,
-    name,
-    value,
-    actionPost = null,
-    headers = {}
-  ) => {
-    e.preventDefault();
-
-    const errResult = await validateForm(newForm);
-    if (Object.keys(errResult).length === 0) {
-      try {
-        Swal.fire({
-          title: "...!",
-          html: "Espere mientras se cargan los datos...",
-          timerProgressBar: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-
-        const res = await sendPostPut(actionServer, newForm, name, value, headers);
-        
-        Swal.close();
-        const { err, msg } = res.data;
-        if (err) {
-          Swal.fire(err);
-        } else {
-          e.target.reset();
-          Swal.fire(msg);
-          setForm(initialForm);
-          if (actionPost) actionPost();
-        }
-      } catch (err) {
-        console.error(
-          `Ocurrió un error al realizar el post del hook useForm: ${actionServer} Err: ${err}`
-        );
-      }
-    } else {
-      setErrors(errResult);
-      return false;
-    }
-  };
 
   return {
     form,
     setForm,
     errors,
+    setErrors,
     handleChange,
     handleBlur,
     handleSubmit,
-    handleSubmitWithObject,
+    isSubmitting,
+    setIsSubmitting
   };
 };

@@ -1,3 +1,4 @@
+import React, { useCallback } from 'react'
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
@@ -6,91 +7,58 @@ import Swal from "sweetalert2";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TemplateAdmin from "../pages/TemplateAdmin";
-import { UnidadDeMedidaEnum } from "../resources/resources";
+import { UnidadDeMedidaEnumNew } from "../resources/resources";
 import { Input, Select, Textarea } from './forms/Input';
+import { useForm } from '../hooks/useFormObj';
+
+const URL_BASE = "http://localhost:8084/OperacionDeTransporte";
 
 // value= valor a validar
 // expresionesRegulares= [array de expresiones regulares]
 // messages= [array de mensajes que quiere imprimir]. Para tener en cuenta que debe coincidir la posición con el array de expresiones
-const validateErr = (
-    value,
-    expresionesRegulares,
-    messages
-) => {
+const validateErr = (value, expresionesRegulares, messages) => {
     let res = '';
-    expresionesRegulares.map(
-        (ex, index) => {
-            res = !ex.test(value) ? messages[index] : res
+
+    expresionesRegulares.forEach((ex, index) => {
+        if (!ex.test(value)) {
+            res = messages[index];
         }
-    )
+    });
 
     if (!value) {
-        res = "Campo requerido"
+        res = "Campo requerido";
     }
-    return res
-}
 
-const RegistrarRemision = () => {
-    const URL_BASE = "http://localhost:8084/OperacionDeTransporte";
+    return res;
+};
 
+
+
+
+const RegistrarManifiesto = () => {
     const { idManifiesto } = useParams();
     const navigate = useNavigate();
 
-
-    const initialForm = {
-        idTitular: '',
-        valorDelViaje: '',
-        idVehiculo: '',
-        idConductor: '',
-        remitente: '',
-        destinatario: '',
-        remesas: [
-        ]
+    const initialFormManifiesto = {
+        idTitular: "",
+        valorDelViaje: "",
+        idVehiculo: "",
+        idConductor: "",
+        remitente: "",
+        destinatario: "",
+        remesas: [],
     };
 
-    const initialRemesa = {
-        tipoDeMercancia: '',
-        caracteristicas: '',
-        peso: '',
-        unidadDeMedida: '',
-        volumen: '',
-        empaque: ''
+    const initialFormRemesa = {
+        tipoDeMercancia: "",
+        caracteristicas: "",
+        peso: "",
+        unidadDeMedida: "",
+        volumen: "",
+        empaque: "",
     };
 
-    const [form, setForm] = useState(initialForm);
-    const [errors, setErrors] = useState({});
-    const [errorsRemesa, setErrorsRemesa] = useState({});
-    const [titulares, setTitulares] = useState([]);
-    const [vehiculos, setVehiculos] = useState([]);
-    const [conductores, setConductores] = useState([]);
-    const [remesa, setRemesa] = useState(initialRemesa);
-    const [isAddRemesa, setIsAddRemesa] = useState(true);
-    const [isUpdateRemesa, setIsUpdateRemesa] = useState(false);
-    const [isAddManifiesto, setIsAddManifiesto] = useState(true);
-    const [isUpdateManifiesto, setIsUpdateManifiesto] = useState(false);
-    const [viewFormRemesa, setViewFormRemesa] = useState(true);
-
-    const handleChange = (e, callback) => {
-        const { name, value } = e.target;
-
-        setForm({
-            ...form,
-            [name]: value,
-        });
-        if (callback) {
-            callback();
-        }
-    };
-
-    const handleRemesaChange = (e) => {
-        const { name, value } = e.target;
-        setRemesa({
-            ...remesa,
-            [name]: value,
-        });
-    };
-
-    const validateForm = (form) => {
+    const validateFormManifiesto = (form) => {
         let errors = {};
 
         // Expresiones regulares
@@ -137,7 +105,6 @@ const RegistrarRemision = () => {
         return errors;
     };
 
-
     const validateFormRemesa = (remesa) => {
         let errors = {};
 
@@ -161,315 +128,220 @@ const RegistrarRemision = () => {
             ["Debe tener una longitud entre 1 y 150 caracteres"]
         );
 
-        errors.peso = validateErr(
-            remesa.peso,
-            [lengthPeso],
-            ["Debe tener una longitud entre 1 y 10 caracteres"]
-        );
+        errors.peso = validateErr(remesa.peso, [lengthPeso], [
+            "Debe tener una longitud entre 1 y 10 caracteres",
+        ]);
 
-        errors.unidadDeMedida = validateErr(
-            remesa.unidadDeMedida,
-            [],
-            ["Campo requerido"]
-        );
+        errors.unidadDeMedida = validateErr(remesa.unidadDeMedida, [], [
+            "Campo requerido",
+        ]);
 
-        errors.volumen = validateErr(
-            remesa.volumen,
-            [lengthVolumen],
-            ["Debe tener una longitud entre 1 y 10 caracteres"]
-        );
+        errors.volumen = validateErr(remesa.volumen, [lengthVolumen], [
+            "Debe tener una longitud entre 1 y 10 caracteres",
+        ]);
 
-        errors.empaque = validateErr(
-            remesa.empaque,
-            [lengthEmpaque],
-            ["Debe tener una longitud entre 1 y 50 caracteres"]
-        );
+        errors.empaque = validateErr(remesa.empaque, [lengthEmpaque], [
+            "Debe tener una longitud entre 1 y 50 caracteres",
+        ]);
 
         return errors;
     };
 
+    const {
+        form: manifiestoForm,
+        setForm: setManifiestoForm,
+        errors: manifiestoErrors,
+        setErrors: setManifiestoErrors,
+        handleChange: handleManifiestoChange,
+        handleBlur: handleManifiestoBlur,
+        handleSubmit: handleManifiestoSubmit,
+        isSubmitting: isManifiestoSubmitting
+    } = useForm(initialFormManifiesto, validateFormManifiesto);
 
-    const handleBlur = (e, callback) => {
-        setErrors(validateForm(form));
-        if (callback) callback();
-    };
+    const {
+        form: remesaForm,
+        setForm: setRemesaForm,
+        errors: remesaErrors,
+        setErrors: setRemesaErrors,
+        handleChange: handleRemesaChange,
+        handleBlur: handleRemesaBlur,
+        handleSubmit: handleRemesaSubmit,
+        isSubmitting: isRemesaSubmitting
+    } = useForm(initialFormRemesa, validateFormRemesa);
 
-    const handleBlurRemesa = (e, callback) => {
-        setErrorsRemesa(validateFormRemesa(remesa));
-        if (callback) callback();
-    };
+    // Additional state
+    const [titulares, setTitulares] = useState([]);
+    const [vehiculos, setVehiculos] = useState([]);
+    const [conductores, setConductores] = useState([]);
+    const [isAddRemesa, setIsAddRemesa] = useState(true);
+    const [isUpdateRemesa, setIsUpdateRemesa] = useState(false);
+    const [viewFormRemesa, setViewFormRemesa] = useState(true);
 
-    const submitRemesa = (e) => {
-        e.preventDefault();
-        setForm({
-            ...form,
-            remesas: [...form.remesas, { ...remesa, num: form.remesas.length + 1 }],
+    const botonAgregarRemesa = () => {
+        setRemesaForm(initialFormRemesa);
+        setRemesaErrors({});
+        setViewFormRemesa(true);
+        setIsAddRemesa(true)
+    }
+
+    const submitRemesa = () => {
+        setManifiestoForm({
+            ...manifiestoForm,
+            remesas: [
+                ...manifiestoForm.remesas,
+                { ...remesaForm, num: manifiestoForm.remesas.length + 1 },
+            ],
         });
-        setRemesa(initialRemesa);
-        setViewFormRemesa(false)
-        setIsAddRemesa(false)
+        setRemesaForm(initialFormRemesa);
+        setViewFormRemesa(false);
+        setIsAddRemesa(false);
     };
 
     const preEditRemesa = async (remesa) => {
-        setViewFormRemesa(true)
-        setRemesa(remesa)
-        setIsUpdateRemesa(true)
-        setIsAddRemesa(false)
-    }
+        setViewFormRemesa(true);
+        setRemesaForm(remesa);
+        setIsUpdateRemesa(true);
+        setIsAddRemesa(false);
+    };
 
-
-    const editRemesa = (e) => {
-        e.preventDefault();
-        const updatedRemesas = form.remesas.map((rem) =>
-            rem.num === remesa.num ? { ...rem, ...remesa } : rem
+    const editRemesa = () => {
+        const updatedRemesas = manifiestoForm.remesas.map((rem) =>
+            rem.num === remesaForm.num ? { ...rem, ...remesaForm } : rem
         );
 
-        setForm({
-            ...form,
-            remesas: updatedRemesas
+        setManifiestoForm({
+            ...manifiestoForm,
+            remesas: updatedRemesas,
         });
 
-        setRemesa(initialRemesa);
+        setRemesaForm(initialFormRemesa);
         setViewFormRemesa(false);
         setIsUpdateRemesa(false);
     };
 
-    const submitManifiesto = async (e) => {
-        e.preventDefault();
+
+    const removeRemesa = (num) => {
+        console.log(`removeRemesa.num: ${num}`)
+        setManifiestoForm({
+            ...manifiestoForm,
+            remesas: manifiestoForm.remesas.filter(rem => rem.num !== num),
+        });
+    };
+
+    const submitManifiesto = async () => {
         try {
-            if (Object.values(errors).some(error => error !== '')
-                || JSON.stringify(form) === JSON.stringify(initialForm)
-                || form.remesas.length === 0) {
-                //console.log(`Object.values(errors).some(error => error !== ''): ${Object.values(errors).some(error => error !== '')}`)
-                //console.log(`JSON.stringify(form) === JSON.stringify(initialForm): ${JSON.stringify(form) === JSON.stringify(initialForm)}`)
-                //console.log(`form.remesas.length === 0: ${form.remesas.length === 0}`)
-                //console.log(`NO pasó `)
+            if (
+                Object.values(manifiestoErrors).some((error) => error !== "") ||
+                JSON.stringify(manifiestoForm) === JSON.stringify(initialFormManifiesto) ||
+                manifiestoForm.remesas.length === 0
+            ) {
                 return;
             }
+
             if (idManifiesto) {
-                await axios.put(`${URL_BASE}/manifiestos/${idManifiesto}`, form);
+                await axios.put(
+                    `${URL_BASE}/manifiestos/${idManifiesto}`,
+                    manifiestoForm
+                );
             } else {
-                await axios.post(`${URL_BASE}/manifiestos`, form);
+                await axios.post(`${URL_BASE}/manifiestos`, manifiestoForm);
             }
-            setForm(initialForm);
+
+            setManifiestoForm(initialFormManifiesto);
+
             Swal.fire({
                 position: "top-end",
                 icon: "success",
                 title: idManifiesto ? "Actualización exitosa" : "Registro exitoso",
                 showConfirmButton: false,
                 toast: true,
-                timer: 1500
+                timer: 1500,
             });
-            navigate('/app/home');  // Redireccionar a la página de inicio
-        } catch (err) {
-            console.warn(`Error saving manifiesto: ${err}`);
-        }
-    }
+            navigate("/");
+        } catch (error) {
+            console.error("Error al enviar el manifiesto:", error);
 
-    const put = async (e) => {
-        e.preventDefault();
-        try {
-            // Validaciones antes de enviar el formulario
-            if (JSON.stringify(errors) === "{}"
-                || Object.values(errors).every(error => error !== '')
-                || JSON.stringify(form) === JSON.stringify(initialForm)
-                || form.remesas.length === 0) {
-                return;
+            if (error.response && error.response.data && error.response.data.errors) {
+                const serverErrors = error.response.data.errors;
+
+                // Actualiza el objeto de errores según la respuesta del servidor
+                setManifiestoErrors((prevErrors) => ({
+                    ...prevErrors,
+                    ...serverErrors,
+                }));
+            } else {
+                // Manejo de errores genéricos
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Ocurrió un error al enviar el formulario",
+                    showConfirmButton: true
+                });
             }
-
-            let res = await axios.put(`${URL_BASE}/manifiestos/${idManifiesto}`, form);
-
-            if (!res.ok) {
-                console.log(JSON.stringify(`res: ${res}`))
-                console.log(JSON.stringify(`res.data: ${res.data}`))
-                return;
-            }
-
-            // Si el registro es exitoso
-            setForm(initialForm);
-            Swal.fire({
-                position: "top-end",
-                icon: "success",
-                title: "Actualización exitosa",
-                showConfirmButton: false,
-                timer: 1500
-            });
-
-        } catch (err) {
-            console.warn(`Err submitManifiesto: ${JSON.stringify(err)}`);
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: err.response?.data?.message || 'Error interno',
-                footer: 'Error interno'
-            });
         }
-    }
+    };
 
-
-    const post = async (e) => {
-        e.preventDefault();
+    const fetchData = useCallback(async () => {
         try {
-            // Validaciones antes de enviar el formulario
-            if (JSON.stringify(errors) === "{}"
-                || Object.values(errors).every(error => error !== '')
-                || JSON.stringify(form) === JSON.stringify(initialForm)
-                || form.remesas.length === 0) {
-                //console.log(`JSON.stringify(errors) == "{}": ${JSON.stringify(errors) == "{}"}`)
-                //console.log(`Object.values(errors).every(error => error === ''): ${Object.values(errors).every(error => error !== '')}`)
-                //console.log(`JSON.stringify(form) !== JSON.stringify(initialForm): ${JSON.stringify(form) === JSON.stringify(initialForm)}`)
-                //console.log(`form.remesas.length == 0: ${form.remesas.length == 0}`)
-                //console.log(`NO pasó `)
-                return;
-            }
+            const [{ data: titulares }, { data: vehiculos }, { data: conductores }] =
+                await Promise.all([
+                    axios.get(`${URL_BASE}/titulares`),
+                    axios.get(`${URL_BASE}/vehiculos`),
+                    axios.get(`${URL_BASE}/conductores`),
+                ]);
 
-            let res = await axios.post(`${URL_BASE}/manifiestos`, form);
-
-            if (!res.ok) {
-                console.log(JSON.stringify(`res: ${res}`))
-                console.log(JSON.stringify(`res.data: ${res.data}`))
-                //throw new Error(`Response status: ${res.status}`);
-                //Swal.fire({
-                //    icon: "error",
-                //    title: "Oops...",
-                //    html: Object.values(res.errors).map(err => `<p>${err}</p>`).join(''),
-                //    footer: 'Corrija los errores en los respectivos campos'
-                //});
-                return;
-            }
-
-            //if (data.code === 400 || data.code === 500) {
-            //    // Actualizar el estado de los errores con los errores devueltos por el servidor
-            //    setErrors(prevErrors => ({
-            //        ...prevErrors,
-            //        ...data.errors
-            //    }));
-            //    Swal.fire({
-            //        icon: "error",
-            //        title: "Oops...",
-            //        html: Object.values(data.errors).map(err => `<p>${err}</p>`).join(''),
-            //        footer: 'Corrija los errores en los respectivos campos'
-            //    });
-            //    return;
-            //}
-
-            // Si el registro es exitoso
-            setForm(initialForm);
-            Swal.fire({
-                position: "top-end",
-                icon: "success",
-                title: "Registro exitoso",
-                showConfirmButton: false,
-                timer: 1500
-            });
-        } catch (err) {
-            console.warn(`Err submitManifiesto: ${JSON.stringify(err)}`);
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: err.response?.data?.message || 'Error interno',
-                footer: 'Error interno'
-            });
+            setTitulares(titulares);
+            setVehiculos(vehiculos);
+            setConductores(conductores);
+        } catch (error) {
+            console.error("Error al obtener datos:", error);
         }
-    };
+    }, []);
 
-
-    const getAllTitulares = async () => {
-        try {
-            const { data } = await axios.get(`${URL_BASE}/titulares`);
-            setTitulares(data);
-        } catch (err) {
-            console.warn(`err getAllTitulares ${err}`)
-        }
-    };
-
-    const getAllVehiculos = async () => {
-        try {
-            const { data } = await axios.get(`${URL_BASE}/vehiculos`);
-            setVehiculos(data);
-        } catch (err) {
-            console.warn(`err getAllVehiculos ${err}`)
-        }
-    };
-
-    const getAllConductores = async () => {
-        try {
-            const { data } = await axios.get(`${URL_BASE}/conductores`);
-            setConductores(data);
-        } catch (err) {
-            console.warn(`err getAllConductores ${err}`)
-        }
-    };
-
-    const getManifiestoById = async () => {
-        try {
-            const { data } = await axios.get(`${URL_BASE}/manifiestos/${idManifiesto}`);
-
-            const initialForm = {
-                idTitular: data.titular.id,
-                valorDelViaje: data.valorDelViaje,
-                idVehiculo: data.vehiculo.id,
-                idConductor: data.conductor.id,
-                remitente: data.remitente,
-                destinatario: data.destinatario,
-                remesas: data.remesas.map((remesa, item) => ({
-                    num: item + 1,
-                    id: remesa.id,
-                    tipoDeMercancia: remesa.tipoDeMercancia,
-                    caracteristicas: remesa.caracteristicas,
-                    peso: remesa.peso,
-                    unidadDeMedida: remesa.unidadDeMedida,
-                    volumen: remesa.volumen,
-                    empaque: remesa.empaque
-                }))
-            };
-
-            setForm(initialForm);
-        } catch (err) {
-            console.warn(`Error en getManifiestoById: ${err}`);
-        }
-    };
-
-    const removeRemesa = (num) => {
-        console.log(`removeRemesa.num: ${num}`)
-        setForm({
-            ...form,
-            remesas: form.remesas.filter(rem => rem.num !== num),
-        });
-    };
-
-
-    const botonAgregarRemesa = () => {
-        setRemesa(initialRemesa);
-        setErrorsRemesa({});
-        setViewFormRemesa(true);
-        setIsAddRemesa(true)
-    }
-
-    const cargaInicial = () => {
-        console.log("Weizman");
-        getAllTitulares();
-        getAllVehiculos();
-        getAllConductores();
+    const fetchManifiesto = useCallback(async () => {
         if (idManifiesto) {
-            setIsUpdateManifiesto(true)
-            getManifiestoById();
-            setIsAddRemesa(false)
-            setIsUpdateRemesa(false)
-            setViewFormRemesa(false)
+            try {
+                const { data } = await axios.get(
+                    `${URL_BASE}/manifiestos/${idManifiesto}`
+                );
+                const initialFormManifiesto = await {
+                    idTitular: data.titular.id,
+                    valorDelViaje: data.valorDelViaje,
+                    idVehiculo: data.vehiculo.id,
+                    idConductor: data.conductor.id,
+                    remitente: data.remitente,
+                    destinatario: data.destinatario,
+                    remesas: data.remesas.map((remesa, item) => ({
+                        num: item + 1,
+                        id: remesa.id,
+                        tipoDeMercancia: remesa.tipoDeMercancia,
+                        caracteristicas: remesa.caracteristicas,
+                        peso: remesa.peso,
+                        unidadDeMedida: remesa.unidadDeMedida,
+                        volumen: remesa.volumen,
+                        empaque: remesa.empaque
+                    }))
+                };
+                setManifiestoForm(initialFormManifiesto);
+            } catch (error) {
+                console.error("Error al obtener el manifiesto:", error);
+            }
         }
-    }
+    }, []);
 
     useEffect(() => {
-        console.log(`isAddRemesa: ${isAddRemesa}`)
-        return () => cargaInicial();
-    }, []);
+        fetchData();
+        if (idManifiesto) {
+            fetchManifiesto();
+            setViewFormRemesa(false);
+        }
+    }, [idManifiesto, fetchManifiesto]);
 
 
     return (
         <TemplateAdmin>
             <h2>{idManifiesto ? "Actualizar Remisión" : "Registrar Remisión"}</h2>
-            <form onSubmit={submitManifiesto}>
+            <form >
                 <div className="row">
 
                     <Select
@@ -477,40 +349,41 @@ const RegistrarRemision = () => {
                         classNameDiv="col-md-4"
                         label="Titular"
                         classNameLabel=""
-                        value={form.idTitular}
+                        value={String(manifiestoForm.idTitular)}
                         name="idTitular"
                         classNameSelect="form-control"
                         required={true}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        err={errors.idTitular}
+                        onChange={handleManifiestoChange}
+                        onBlur={handleManifiestoBlur}
+                        err={manifiestoErrors.idTitular}
                         itemKey="id"
                         itemLabel={item => `${item.nombre} ${item.apellido}`}
                     />
+
                     <Input
                         classNameDiv="col-md-4"
                         label="Valor del viaje"
                         type="number"
                         required={true}
-                        onBlur={handleBlur}
+                        onBlur={handleManifiestoBlur}
                         name="valorDelViaje"
-                        value={form.valorDelViaje}
-                        onChange={handleChange}
+                        value={manifiestoForm.valorDelViaje}
+                        onChange={handleManifiestoChange}
                         classNameInput="form-control"
-                        err={errors.valorDelViaje}
+                        err={manifiestoErrors.valorDelViaje}
                     />
                     <Select
                         items={vehiculos}
                         classNameDiv="col-md-4"
                         label="Vehiculo"
                         classNameLabel=""
-                        value={form.idVehiculo}
+                        value={manifiestoForm.idVehiculo + ""}
                         name="idVehiculo"
                         classNameSelect="form-control"
                         required={true}
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        err={errors.idVehiculo}
+                        onBlur={handleManifiestoBlur}
+                        onChange={handleManifiestoChange}
+                        err={manifiestoErrors.idVehiculo}
                         itemKey="id"
                         itemLabel={item => `${item.nombre} ${item.marca}`}
                     />
@@ -519,13 +392,13 @@ const RegistrarRemision = () => {
                         classNameDiv="col-md-4"
                         label="Conductor"
                         classNameLabel=""
-                        value={form.idConductor}
+                        value={manifiestoForm.idConductor + ""}
                         name="idConductor"
                         classNameSelect="form-control"
                         required={true}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        err={errors.idConductor}
+                        onChange={handleManifiestoChange}
+                        onBlur={handleManifiestoBlur}
+                        err={manifiestoErrors.idConductor}
                         itemKey="id"
                         itemLabel={item => `${item.nombre} ${item.apellido}`}
                     />
@@ -534,24 +407,24 @@ const RegistrarRemision = () => {
                         label="Remitente"
                         type="text"
                         required={true}
-                        onBlur={handleBlur}
+                        onBlur={handleManifiestoBlur}
                         name="remitente"
-                        value={form.remitente}
-                        onChange={handleChange}
+                        value={manifiestoForm.remitente}
+                        onChange={handleManifiestoChange}
                         classNameInput="form-control"
-                        err={errors.remitente}
+                        err={manifiestoErrors.remitente}
                     />
                     <Input
                         classNameDiv="col-md-4"
                         label="Destinatario"
                         type="text"
                         required={true}
-                        onBlur={handleBlur}
+                        onBlur={handleManifiestoBlur}
                         name="destinatario"
-                        value={form.destinatario}
-                        onChange={handleChange}
+                        value={manifiestoForm.destinatario}
+                        onChange={handleManifiestoChange}
                         classNameInput="form-control"
-                        err={errors.destinatario}
+                        err={manifiestoErrors.destinatario}
                     />
                 </div>
             </form>
@@ -559,7 +432,7 @@ const RegistrarRemision = () => {
 
             {
                 viewFormRemesa ? (
-                    <form onSubmit={isAddRemesa ? submitRemesa : editRemesa}>
+                    <form onSubmit={(e) => handleRemesaSubmit(e, !idManifiesto ? submitRemesa : editRemesa)}>
                         <h2>{isAddRemesa ? "Agregar Remesa" : isUpdateRemesa ? "Actualizar Remesa" : ""}</h2>
                         <div className="row">
                             <Input
@@ -567,23 +440,23 @@ const RegistrarRemision = () => {
                                 label="Tipo de Mercancía"
                                 type="text"
                                 required={true}
-                                onBlur={handleBlurRemesa}
+                                onBlur={handleRemesaBlur}
                                 name="tipoDeMercancia"
-                                value={remesa.tipoDeMercancia}
+                                value={remesaForm.tipoDeMercancia}
                                 onChange={handleRemesaChange}
                                 classNameInput="form-control"
-                                err={errorsRemesa.tipoDeMercancia}
+                                err={remesaErrors.tipoDeMercancia}
                             />
                             <Textarea
                                 classNameDiv="col-md-4"
                                 label="Características"
                                 required={true}
                                 name="caracteristicas"
-                                value={remesa.caracteristicas}
-                                onBlur={handleBlurRemesa}
+                                value={remesaForm.caracteristicas}
+                                onBlur={handleRemesaBlur}
                                 onChange={handleRemesaChange}
                                 classNameInput="form-control"
-                                err={errorsRemesa.caracteristicas}
+                                err={remesaErrors.caracteristicas}
                             />
                             <Input
                                 classNameDiv="col-md-4"
@@ -591,26 +464,24 @@ const RegistrarRemision = () => {
                                 type="number"
                                 required={true}
                                 name="peso"
-                                value={remesa.peso}
-                                onBlur={handleBlurRemesa}
+                                value={remesaForm.peso}
+                                onBlur={handleRemesaBlur}
                                 onChange={handleRemesaChange}
                                 classNameInput="form-control"
-                                err={errorsRemesa.peso}
+                                err={remesaErrors.peso}
                             />
                             <Select
-                                items={UnidadDeMedidaEnum}
+                                items={UnidadDeMedidaEnumNew}
                                 classNameDiv="col-md-4"
                                 label="Unidad de Medida"
                                 classNameLabel=""
-                                value={remesa.unidadDeMedida}
+                                value={remesaForm.unidadDeMedida + ""}
                                 name="unidadDeMedida"
                                 classNameSelect="form-control"
                                 required={true}
-                                onBlur={handleBlurRemesa}
+                                onBlur={handleRemesaBlur}
                                 onChange={handleRemesaChange}
-                                err={errorsRemesa.unidadDeMedida}
-                                itemKey="name"
-                                itemLabel={item => `${item.name}`}
+                                err={remesaErrors.unidadDeMedida}
                             />
                             <Input
                                 classNameDiv="col-md-4"
@@ -618,9 +489,9 @@ const RegistrarRemision = () => {
                                 type="text"
                                 required={true}
                                 name="volumen"
-                                onBlur={handleBlurRemesa}
-                                value={remesa.volumen}
-                                err={errorsRemesa.volumen}
+                                onBlur={handleRemesaBlur}
+                                value={remesaForm.volumen}
+                                err={remesaErrors.volumen}
                                 onChange={handleRemesaChange}
                                 classNameInput="form-control"
                             />
@@ -629,19 +500,19 @@ const RegistrarRemision = () => {
                                 label="Empaque"
                                 type="text"
                                 required={true}
-                                onBlur={handleBlurRemesa}
+                                onBlur={handleRemesaBlur}
                                 name="empaque"
-                                value={remesa.empaque}
-                                err={errorsRemesa.empaque}
+                                value={remesaForm.empaque}
+                                err={remesaErrors.empaque}
                                 onChange={handleRemesaChange}
                                 classNameInput="form-control"
                             />
                             <div className="col-12 d-flex justify-content-end">
-                                <button className="btn btn-secondary" onClick={() => { setRemesa(initialRemesa); setErrorsRemesa({}); setViewFormRemesa(false); setIsAddRemesa(false); setIsUpdateRemesa(false) }}>
-                                    Limpiar formulario
+                                <button className="btn btn-secondary" onClick={() => { setRemesaForm(initialFormRemesa); setRemesaErrors({}); setViewFormRemesa(false); setIsAddRemesa(false); setIsUpdateRemesa(false) }}>
+                                    Cancelar
                                 </button>
-                                <button className="btn btn-primary" >
-                                    {isAddRemesa ? "Agregar" : isUpdateRemesa ? "Actualizar" : "Agregar"}
+                                <button className="btn btn-primary" disabled={isRemesaSubmitting}>
+                                    {isRemesaSubmitting ? "Enviando..." : isUpdateRemesa ? "Actualizar remesa" : "Agregar remesa"}
                                 </button>
                             </div>
                         </div>
@@ -670,7 +541,7 @@ const RegistrarRemision = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {form.remesas.map((remesa, index) => (
+                    {manifiestoForm.remesas.map((remesa, index) => (
                         <tr key={index}>
                             <th scope="row">{remesa.num}</th>
                             <td>{remesa.tipoDeMercancia}</td>
@@ -695,13 +566,14 @@ const RegistrarRemision = () => {
             </table>
             <div className="row text-center">
                 <div className="col-12 pt-3">
-                    <button className="btn btn-success" onClick={submitManifiesto} >
-                        {isUpdateManifiesto ? "Actualizar Remisión" : "Registrar Remisión"}
+                    <button className="btn btn-primary" disabled={isManifiestoSubmitting} type='button' onClick={(e) => handleManifiestoSubmit(e, submitManifiesto)}>
+                        {isManifiestoSubmitting ? "Enviando..." : idManifiesto ? "Actualizar Remisión" : "Registrar Remisión"}
                     </button>
+
                 </div>
             </div>
         </TemplateAdmin>
-    );
-};
+    )
+}
 
-export default RegistrarRemision;
+export default RegistrarManifiesto
